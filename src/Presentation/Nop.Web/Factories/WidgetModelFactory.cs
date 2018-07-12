@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Routing;
 using Nop.Core;
 using Nop.Core.Caching;
@@ -80,23 +81,13 @@ namespace Nop.Web.Factories
 
             //"WidgetViewComponentArguments" property of widget models depends on "additionalData".
             //We need to clone the cached model before modifications (the updated one should not be cached)
-            var clonedModel = new List<RenderWidgetModel>();
+            var clonedModel = (from widgetModel in cachedModel
+                               select new RenderWidgetModel
+                               {
+                                   WidgetViewComponentName = widgetModel.WidgetViewComponentName,
+                                   WidgetViewComponentArguments = componentArguments
 
-            foreach (var widgetModel in cachedModel)
-            {
-                var clonedWidgetModel = new RenderWidgetModel
-                {
-                    WidgetViewComponentName = widgetModel.WidgetViewComponentName
-                };
-
-                if (widgetModel.WidgetViewComponentArguments != null)
-                    clonedWidgetModel.WidgetViewComponentArguments = new RouteValueDictionary(widgetModel.WidgetViewComponentArguments);
-
-                if (clonedWidgetModel.WidgetViewComponentArguments == null)
-                    clonedWidgetModel.WidgetViewComponentArguments = componentArguments;
-
-                clonedModel.Add(clonedWidgetModel);
-            }
+                               }).ToList();
 
             return clonedModel;
         }
