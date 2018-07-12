@@ -55,13 +55,6 @@ namespace Nop.Web.Factories
             var cacheKey = string.Format(ModelCacheEventConsumer.WIDGET_MODEL_KEY,
                 _workContext.CurrentCustomer.Id, _storeContext.CurrentStore.Id, widgetZone, _themeContext.WorkingThemeName);
 
-            //add widget zone to view component arguments
-            var componentArguments = new RouteValueDictionary
-            {
-                { "widgetZone", widgetZone },
-                { "additionalData", additionalData }
-            };
-
             var cachedModel = _cacheManager.Get(cacheKey, () =>
             {
                 //model
@@ -73,7 +66,10 @@ namespace Nop.Web.Factories
                     model.Add(new RenderWidgetModel
                     {
                         WidgetViewComponentName = widget.GetWidgetViewComponentName(widgetZone),
-                        WidgetViewComponentArguments = componentArguments
+                        WidgetViewComponentArguments = new RouteValueDictionary
+                            {
+                                { "widgetZone", widgetZone }
+                            }
                     });
                 }
                 return model;
@@ -81,13 +77,16 @@ namespace Nop.Web.Factories
 
             //"WidgetViewComponentArguments" property of widget models depends on "additionalData".
             //We need to clone the cached model before modifications (the updated one should not be cached)
-            var clonedModel = (from widgetModel in cachedModel
-                               select new RenderWidgetModel
-                               {
-                                   WidgetViewComponentName = widgetModel.WidgetViewComponentName,
-                                   WidgetViewComponentArguments = componentArguments
-
-                               }).ToList();
+            var clonedModel = cachedModel.Select(renderModel => new RenderWidgetModel
+                {
+                    WidgetViewComponentName = renderModel.WidgetViewComponentName,
+                    WidgetViewComponentArguments = new RouteValueDictionary
+                        {
+                            { "widgetZone", widgetZone },
+                            { "additionalData", additionalData }
+                        }
+                }
+            ).ToList();
 
             return clonedModel;
         }
