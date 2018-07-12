@@ -154,6 +154,17 @@ namespace Nop.Web.Framework.Infrastructure.Extensions
         }
 
         /// <summary>
+        /// Configure middleware for dynamically compressing HTTP responses
+        /// </summary>
+        /// <param name="application">Builder for configuring an application's request pipeline</param>
+        public static void UseNopResponseCompression(this IApplicationBuilder application)
+        {
+            //whether to use compression (gzip by default)
+            if (DataSettingsManager.DatabaseIsInstalled && EngineContext.Current.Resolve<CommonSettings>().UseResponseCompression)
+                application.UseResponseCompression();
+        }
+
+        /// <summary>
         /// Configure static file serving
         /// </summary>
         /// <param name="application">Builder for configuring an application's request pipeline</param>
@@ -163,9 +174,12 @@ namespace Nop.Web.Framework.Infrastructure.Extensions
 
             Action<StaticFileResponseContext> staticFileResponse = (context) =>
             {
-                var commonSettings = EngineContext.Current.Resolve<CommonSettings>();
-                if (!string.IsNullOrEmpty(commonSettings.StaticFilesCacheControl))
-                    context.Context.Response.Headers.Append(HeaderNames.CacheControl, commonSettings.StaticFilesCacheControl);
+                if (DataSettingsManager.DatabaseIsInstalled)
+                {
+                    var commonSettings = EngineContext.Current.Resolve<CommonSettings>();
+                    if (!string.IsNullOrEmpty(commonSettings.StaticFilesCacheControl))
+                        context.Context.Response.Headers.Append(HeaderNames.CacheControl, commonSettings.StaticFilesCacheControl);
+                }
             };
 
             //common static files

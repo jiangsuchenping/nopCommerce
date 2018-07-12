@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Routing;
+using Nop.Core.Data;
 using Nop.Core.Domain.Common;
 using Nop.Core.Infrastructure;
 using Nop.Web.Framework.Localization;
@@ -19,8 +20,7 @@ namespace Nop.Web.Infrastructure
         /// <param name="routeBuilder">Route builder</param>
         public void RegisterRoutes(IRouteBuilder routeBuilder)
         {
-            var commonSettings = EngineContext.Current.Resolve<CommonSettings>();
-            if (!commonSettings.SupportPreviousNopcommerceVersions)
+            if (DataSettingsManager.DatabaseIsInstalled && !EngineContext.Current.Resolve<CommonSettings>().SupportPreviousNopcommerceVersions)
                 return;
 
             //products

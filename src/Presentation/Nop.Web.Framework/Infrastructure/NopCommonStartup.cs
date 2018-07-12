@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Nop.Core.Domain.Common;
 using Nop.Core.Infrastructure;
 using Nop.Web.Framework.Infrastructure.Extensions;
 
@@ -30,7 +29,7 @@ namespace Nop.Web.Framework.Infrastructure
 
             //add distributed memory cache
             services.AddDistributedMemoryCache();
-                        
+
             //add HTTP sesion state feature
             services.AddHttpSession();
 
@@ -50,9 +49,8 @@ namespace Nop.Web.Framework.Infrastructure
         /// <param name="application">Builder for configuring an application's request pipeline</param>
         public void Configure(IApplicationBuilder application)
         {
-            //whether to use compression (gzip by default)
-            if (EngineContext.Current.Resolve<CommonSettings>().UseResponseCompression)
-                application.UseResponseCompression();
+            //use response compression
+            application.UseNopResponseCompression();
 
             //use static files feature
             application.UseNopStaticFiles();
